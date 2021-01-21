@@ -14,6 +14,8 @@ setup(
         "scipy",
         "pandas",
         "requests",
+        "matplotlib",
+        "jinja2",
     ],
     python_requires=">=3.6",
     entry_points={

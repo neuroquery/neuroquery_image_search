@@ -1,21 +1,27 @@
 from pathlib import Path
 import tempfile
+from unittest.mock import MagicMock
 
 import pytest
 import numpy as np
 import pandas as pd
 from scipy import sparse
 import nibabel
+import nilearn
 from nilearn.datasets import _testing
 
-from nilearn.datasets._testing import request_mocker   # noqa: F401
+from nilearn.datasets._testing import request_mocker  # noqa: F401
+
+
+def make_fake_img():
+    rng = np.random.default_rng(0)
+    img = rng.random(size=(4, 3, 5))
+    return nibabel.Nifti1Image(img, np.eye(4))
 
 
 @pytest.fixture()
 def fake_img():
-    rng = np.random.default_rng(0)
-    img = rng.random(size=(4, 3, 5))
-    return nibabel.Nifti1Image(img, np.eye(4))
+    return make_fake_img()
 
 
 def make_fake_data():
@@ -64,8 +70,20 @@ def temp_data_dir(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture(autouse=True, scope="function")
-def osf_mocker(request_mocker):
+def map_mock_requests(request_mocker):
     request_mocker.url_mapping[
         "https://osf.io/rvm78/download"
     ] = make_fake_data()
     return request_mocker
+
+
+@pytest.fixture(autouse=True)
+def patch_nilearn(monkeypatch):
+    def fake_motor_task(*args, **kwargs):
+        return {"images": [make_fake_img()]}
+
+    monkeypatch.setattr(
+        nilearn.datasets, "fetch_neurovault_motor_task", fake_motor_task
+    )
+    monkeypatch.setattr(
+        "webbrowser.open", MagicMock())

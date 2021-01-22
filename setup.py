@@ -6,9 +6,8 @@ setup(
     name="neuroquery_image_search",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    package_data={},
+    package_data={"neuroquery_image_search.data": ["*"]},
     install_requires=[
-        "neuroquery",
         "nilearn",
         "numpy",
         "scipy",
@@ -21,7 +20,7 @@ setup(
     entry_points={
         "console_scripts": [
             "neuroquery_image_search = "
-            "neuroquery_image_search.image_search:image_search"
+            "neuroquery_image_search.searching:image_search"
         ]
     },
 )

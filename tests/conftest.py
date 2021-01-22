@@ -25,13 +25,14 @@ def fake_img():
 
 
 def make_fake_data():
-    n_voxels, n_components, n_studies = 23, 8, 12
+    n_voxels, n_components, n_studies, n_terms = 23, 8, 12, 9
     rng = np.random.default_rng(0)
     difumo_maps = rng.random((n_components, n_voxels))
     difumo_maps[rng.binomial(1, 0.3, size=difumo_maps.shape).astype(int)] = 0
     difumo_inverse_covariance = np.linalg.pinv(difumo_maps.dot(difumo_maps.T))
     difumo_maps = sparse.csr_matrix(difumo_maps)
     projections = rng.random((n_studies, n_components))
+    term_projections = rng.random((n_terms, n_components))
     articles_info = pd.DataFrame({"pmid": np.arange(n_studies) + 100})
     articles_info["title"] = [
         f"title {pmid}" for pmid in articles_info["pmid"]
@@ -43,6 +44,12 @@ def make_fake_data():
     mask[:n_voxels] = 1
     mask = mask.reshape((4, 3, 5))
     mask_img = nibabel.Nifti1Image(mask, np.eye(4))
+    doc_freq = pd.DataFrame(
+        {
+            "term": ["term_{i}" for i in range(n_terms)],
+            "document_frequency": np.arange(n_terms),
+        }
+    )
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir = Path(temp_dir)
         sparse.save_npz(temp_dir / "difumo_maps.npz", difumo_maps)
@@ -51,8 +58,12 @@ def make_fake_data():
             difumo_inverse_covariance,
         )
         np.save(temp_dir / "projections.npy", projections)
+        np.save(temp_dir / "term_projections.npy", term_projections)
         articles_info.to_csv(temp_dir / "articles-info.csv", index=False)
         mask_img.to_filename(str(temp_dir / "mask.nii.gz"))
+        doc_freq.to_csv(
+            str(temp_dir / "document_frequencies.csv"), index=False
+        )
         archive = _testing.dict_to_archive(
             {"neuroquery_image_search_data": temp_dir}
         )
@@ -72,7 +83,7 @@ def temp_data_dir(tmp_path_factory, monkeypatch):
 @pytest.fixture(autouse=True, scope="function")
 def map_mock_requests(request_mocker):
     request_mocker.url_mapping[
-        "https://osf.io/rvm78/download"
+        "https://osf.io/mx3t4/download"
     ] = make_fake_data()
     return request_mocker
 
@@ -85,5 +96,4 @@ def patch_nilearn(monkeypatch):
     monkeypatch.setattr(
         nilearn.datasets, "fetch_neurovault_motor_task", fake_motor_task
     )
-    monkeypatch.setattr(
-        "webbrowser.open", MagicMock())
+    monkeypatch.setattr("webbrowser.open", MagicMock())

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>$title</title>
+        <meta charset="UTF-8" />
+        <style>
+         .studies-table tr:nth-child(even) {background: #EEE}
+         .studies-table tr:nth-child(odd) {background: #FFF}
+         .studies-table td { padding: 7px }
+         .results-display {
+             max-width: 100%;
+             margin: 0 auto;
+             display: grid;
+             grid-gap: 1rem;
+         }
+         @media (min-width: 600px) {
+             .results-display { grid-template-columns: repeat(2, 1fr); }
+         }
+        </style>
+    </head>
+    <body>
+        <div class="results-display">
+            <div class="img-and-title">
+                <h1>$title</h1>
+                $img_display
+            </div>
+            <div class="similar-terms">
+                <h2>Most similar terms</h2>
+                $terms_table
+            </div>
+        </div>
+        <div class="similar-studies">
+            <h2>Most similar studies</h2>
+            $studies_table
+        </div>
+
+    </body>
+</html>

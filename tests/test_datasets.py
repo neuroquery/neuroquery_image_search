@@ -1,9 +1,9 @@
-from neuroquery_image_search import datasets
+from neuroquery_image_search import _datasets
 
 
 def test_fetch_data(request_mocker):
 
-    data = datasets.fetch_data()
+    data = _datasets.fetch_data()
     assert data.keys() == {
         "masker",
         "atlas_maps",
@@ -13,5 +13,5 @@ def test_fetch_data(request_mocker):
         "studies_info",
         "document_frequencies"
     }
-    data = datasets.fetch_data()
+    data = _datasets.fetch_data()
     assert request_mocker.url_count == 1

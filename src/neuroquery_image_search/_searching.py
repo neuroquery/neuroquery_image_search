@@ -5,12 +5,12 @@ import json
 import numpy as np
 from nilearn import plotting, datasets, image
 
-from neuroquery_image_search.datasets import fetch_data
+from neuroquery_image_search._datasets import fetch_data
 
 
 def studies_to_html_table(studies):
     studies["Title"] = [
-        f"<a href={link} target='_blank'>{text}</a>"
+        f"<a href='{link}' target='_blank'>{text}</a>"
         for link, text in studies.loc[:, ["pubmed_url", "title"]].values
     ]
     studies = studies.loc[
@@ -31,10 +31,14 @@ def studies_to_html_table(studies):
 
 
 def terms_to_html_table(terms):
-    terms = terms.loc[:, ["term", "similarity"]]
-    terms.rename(
-        columns={"term": "Term", "similarity": "Similarity"}, inplace=True
+    nq_url = (
+        "<a href='https://neuroquery.org/query?text={}' target='_blank'>{}</a>"
     )
+    terms["Term"] = [
+        nq_url.format(t.replace(" ", "+"), t) for t in terms["term"]
+    ]
+    terms = terms.loc[:, ["Term", "similarity"]]
+    terms.rename(columns={"similarity": "Similarity"}, inplace=True)
     table = (
         terms.style.bar(
             subset=["Similarity"], color="lightgreen", width=95, vmin=0.0

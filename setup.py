@@ -20,7 +20,7 @@ setup(
     entry_points={
         "console_scripts": [
             "neuroquery_image_search = "
-            "neuroquery_image_search.searching:image_search"
+            "neuroquery_image_search._searching:image_search"
         ]
     },
 )

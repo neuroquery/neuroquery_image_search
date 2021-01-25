@@ -9,6 +9,18 @@ from neuroquery_image_search._datasets import fetch_data
 
 
 def studies_to_html_table(studies):
+    """Transform DataFrame of similar studies to an HTML table.
+
+    Parameters
+    ----------
+    studies : pandas DataFrame, as returned by
+        `NeuroQueryImageSearch()(img)["studies"]`
+
+    Returns
+    -------
+    table : a `str` containing an HTML table.
+
+    """
     studies["Title"] = [
         f"<a href='{link}' target='_blank'>{text}</a>"
         for link, text in studies.loc[:, ["pubmed_url", "title"]].values
@@ -31,6 +43,18 @@ def studies_to_html_table(studies):
 
 
 def terms_to_html_table(terms):
+    """Transform DataFrame of similar terms to an HTML table.
+
+    Parameters
+    ----------
+    terms : pandas DataFrame, as returned by
+        `NeuroQueryImageSearch()(img)["terms"]`
+
+    Returns
+    -------
+    table : a `str` containing an HTML table.
+
+    """
     nq_url = (
         "<a href='https://neuroquery.org/query?text={}' target='_blank'>{}</a>"
     )
@@ -51,7 +75,22 @@ def terms_to_html_table(terms):
     return table
 
 
-def results_to_html(results, title):
+def results_to_html(results, title="NeuroQuery Image Search"):
+    """Create an HTML page displaying results of NeuroQueryImageSearch
+
+    Parameters
+    ----------
+    results : dict returned by `NeuroQueryImageSearch()(img)`
+
+    title : str, title of the resulting page
+
+    Returns
+    -------
+    html : nilearn.plotting.html_document.HTMLDocument
+       An object representing an HTML page; methods of interest are
+       `save_as_html` and `open_in_browser`.
+
+    """
     studies_table = studies_to_html_table(results["studies"])
     terms_table = terms_to_html_table(results["terms"])
     img_display = plotting.view_img(
@@ -81,12 +120,54 @@ class _JSONEncoder(json.JSONEncoder):
 
 
 class NeuroQueryImageSearch:
+    """Search for studies and terms with activation maps similar to an image.
+
+    Searches the NeuroQuery dataset (see https://neuroquery.org)
+
+    How to use:
+    >>> search = NeuroQueryImageSearch()
+    >>> results_a = search("image_a.nii.gz")
+    >>> results_b = search("image_b.nii.gz")
+
+    Returns a dict containing "terms" and "studies" DataFrames as well as
+    "image" (`nibabel.Nifti1Image` containing the input image).
+
+    """
     def __init__(self):
         self.data = fetch_data()
 
     def __call__(
         self, query_img, n_studies=50, n_terms=20, transform="absolute_value"
     ):
+        """Search for studies and terms with activation maps similar to an image
+
+        Parameters
+        ----------
+        query_img : path to a .nii.gz image or `nibabel.Nifti1Image`; the input
+            image
+
+        n_studies : number of similar studies to return
+
+        n_terms : number of similar terms to return
+
+        transform : {"absolute_value", "positive_part" or "identity"}
+            Transformation to apply to the input image. As NeuroQuery
+            activation coordinates don't have a sign, often results are more
+            helpful when comparing to the absolute value of the input image.
+            "absolute_value" is the default.
+
+        Returns
+        -------
+        results : dictionary with keys "image", "studies", "terms".
+           - "image" is the input image
+
+           - "studies" is a pandas DataFrame containing similar studies with
+             columns: ['pmid', 'title', 'pubmed_url', 'similarity']
+
+           - "terms" is a pandas DataFrame containing similar terms with
+             columns: ['term', 'document_frequency', 'similarity'].
+
+        """
         total_n_studies = self.data["studies_loadings"].shape[0]
         total_n_terms = self.data["terms_loadings"].shape[0]
         print(
@@ -148,7 +229,8 @@ def _get_parser():
         nargs="?",
         type=str,
         default=None,
-        help="Nifti image with which to query the dataset",
+        help="Nifti image with which to query the dataset. "
+        "If not provided, an example image is downloaded from neurovault.org.",
     )
     parser.add_argument(
         "--n_studies",

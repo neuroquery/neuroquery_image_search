@@ -7,6 +7,9 @@ and produces a list of studies that report activation patterns similar to that
 image. It also returns a list of terms whose NeuroQuery maps are similar to the
 input image.
 
+To reduce memory usage and computation time, images are represented by their
+projection on the [DiFuMo atlas](https://parietal-inria.github.io/DiFuMo/).
+
 Unlike NeuroQuery, NeuroQuery Image Search isn't hosted anywhere online. However
 we provide a [Voilà](https://github.com/voila-dashboards/voila) dashboard that
 can be run for example on `mybinder` by following [this

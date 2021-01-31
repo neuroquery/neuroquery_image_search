@@ -20,7 +20,7 @@ setup(
     version=version,
     url="https://github.com/neuroquery/neuroquery_image_search",
     maintainer="Jerome Dockes",
-    maintainer_emain="jerome@dockes.org",
+    maintainer_email="jerome@dockes.org",
     license="BSD 3-Clause License",
     classifiers=["Programming Language :: Python :: 3"],
     packages=find_packages("src"),

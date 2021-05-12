@@ -58,6 +58,8 @@ optional arguments:
   --transform {absolute_value,identity,positive_part}
                         Transform to apply to the image. As NeuroQuery ignores the direction of activations by default the absolute value of the
                         input map is compared to activation patterns in the literature. (default: absolute_value)
+  --no_rescaling        Disable rescaling the similarities. By default they
+                        are mapped to the [0, 1] range. (default: False)
 ```
 
 ## As a Python package

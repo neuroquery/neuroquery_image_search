@@ -119,6 +119,14 @@ class _JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+def _rescale_similarities(similarities):
+    if (similarities == 0).all():
+        return similarities
+    similarities = similarities - similarities.min()
+    similarities = similarities / similarities.max()
+    return similarities
+
+
 class NeuroQueryImageSearch:
     """Search for studies and terms with activation maps similar to an image.
 
@@ -133,11 +141,17 @@ class NeuroQueryImageSearch:
     "image" (`nibabel.Nifti1Image` containing the input image).
 
     """
+
     def __init__(self):
         self.data = fetch_data()
 
     def __call__(
-        self, query_img, n_studies=50, n_terms=20, transform="absolute_value"
+        self,
+        query_img,
+        n_studies=50,
+        n_terms=20,
+        transform="absolute_value",
+        rescale_similarities=True,
     ):
         """Search for studies and terms with activation maps similar to an image
 
@@ -155,6 +169,9 @@ class NeuroQueryImageSearch:
             activation coordinates don't have a sign, often results are more
             helpful when comparing to the absolute value of the input image.
             "absolute_value" is the default.
+
+        rescale_similarities : if `True` (the default), similarities are
+            rescaled to span the range [0, 1]
 
         Returns
         -------
@@ -189,8 +206,9 @@ class NeuroQueryImageSearch:
 
         similarities = self.data["studies_loadings"].dot(query)
         most_similar = np.argsort(similarities)[::-1][:n_studies]
-        if (similarities > 0).any():
-            similarities /= similarities.max()
+
+        if rescale_similarities:
+            similarities = _rescale_similarities(similarities)
         study_results = (
             self.data["studies_info"]
             .iloc[most_similar]
@@ -204,8 +222,8 @@ class NeuroQueryImageSearch:
             1 + self.data["document_frequencies"]["document_frequency"].values
         )
         most_similar = np.argsort(similarities)[::-1][:n_terms]
-        if (similarities > 0).any():
-            similarities /= similarities.max()
+        if rescale_similarities:
+            similarities = _rescale_similarities(similarities)
         term_results = (
             self.data["document_frequencies"]
             .iloc[most_similar]
@@ -262,6 +280,12 @@ def _get_parser():
         "direction of activations by default the absolute value of the "
         "input map is compared to activation patterns in the literature.",
     )
+    parser.add_argument(
+        "--no_rescaling",
+        action="store_true",
+        help="Disable rescaling the similarities. "
+        "By default they are mapped to the [0, 1] range.",
+    )
     return parser
 
 
@@ -281,6 +305,7 @@ def image_search(args=None):
         n_studies=args.n_studies,
         n_terms=args.n_terms,
         transform=args.transform,
+        rescale_similarities=(not args.no_rescaling)
     )
     if args.output is None:
         results_to_html(results, image_name).open_in_browser()

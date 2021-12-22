@@ -47,7 +47,14 @@ def test_json_encoder():
 
 def test_neuroquery_image_search(fake_img):
     search = _searching.NeuroQueryImageSearch()
-    results = search(fake_img, 20, transform="identity")["studies"]
+
+    results = search(fake_img, 20, transform="identity", rescale_similarities=False)
+    assert results["studies"]["similarity"].max() != pytest.approx(1.)
+
+    results = search(fake_img, 20, transform="identity")
+    assert results["terms"]["similarity"].min() == pytest.approx(0.)
+    assert results["studies"]["similarity"].max() == pytest.approx(1.)
+    results = results["studies"]
     neg_img = image.new_img_like(fake_img, image.get_data(fake_img) * -1.0)
     neg_results = search(neg_img, 20, transform="identity")["studies"]
     assert (neg_results["pmid"].values == results["pmid"].values[::-1]).all()

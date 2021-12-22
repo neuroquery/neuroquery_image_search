@@ -13,7 +13,7 @@ projection on the [DiFuMo atlas](https://parietal-inria.github.io/DiFuMo/).
 Unlike NeuroQuery, NeuroQuery Image Search isn't hosted anywhere online. However
 we provide a [Voilà](https://github.com/voila-dashboards/voila) dashboard that
 can be run for example on `mybinder` by following [this
-link](https://mybinder.org/v2/gh/neuroquery/neuroquery_apps/master?urlpath=%2Fvoila%2Frender%2Fimage_search.py),
+link](https://mybinder.org/v2/gh/neuroquery/neuroquery_apps/main?urlpath=%2Fvoila%2Frender%2Fimage_search.py),
 or locally by cloning [this
 repository](https://github.com/neuroquery/neuroquery_apps).
 

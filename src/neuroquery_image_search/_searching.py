@@ -33,11 +33,11 @@ def studies_to_html_table(studies):
         studies.style.bar(
             subset=["Similarity"], color="lightgreen", width=98, vmin=0.0
         )
-        .hide_index()
-        .hide_columns(["pmid", "title", "pubmed_url"])
+        .hide(axis=0)
+        .hide(["pmid", "title", "pubmed_url"], axis=1)
         .format({"Similarity": "{:.2f}"})
         .set_table_attributes('class="studies-table"')
-        .render()
+        .to_html()
     )
     return table
 
@@ -67,10 +67,10 @@ def terms_to_html_table(terms):
         terms.style.bar(
             subset=["Similarity"], color="lightgreen", width=95, vmin=0.0
         )
-        .hide_index()
+        .hide(axis=0)
         .format({"Similarity": "{:.2f}"})
         .set_table_attributes('class="terms-table"')
-        .render()
+        .to_html()
     )
     return table
 
